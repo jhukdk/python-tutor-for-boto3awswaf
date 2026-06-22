@@ -1,0 +1,15 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadOnlyWafForTerraformPlan",
+      "Effect": "Allow",
+      "Action": [
+        "wafv2:GetIPSet",
+        "wafv2:ListIPSets",
+        "wafv2:ListTagsForResource"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

@@ -27,3 +27,31 @@ jobs:
       - name: Terraform validate
         run: terraform validate
 
+  plan:
+    runs-on: ubuntu-latest
+    needs: validate
+    permissions:
+      id-token: write # required: lets the workflow request an OIDC token
+      contents: read # required: lets actions/checkout read the repo
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        run: terraform init
+
+      - name: Terraform plan
+        run: terraform plan
+
