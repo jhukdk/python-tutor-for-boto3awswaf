@@ -13,3 +13,11 @@ __pycache__/
 # Local AWS / secrets — never commit credentials
 .aws/
 *.env
+
+# Terraform — commit .tf files and .terraform.lock.hcl; ignore the rest.
+# State can contain secrets/tokens and must never be committed.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log
