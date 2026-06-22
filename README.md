@@ -1,4 +1,4 @@
-# AWS WAF Automation & Analysis — Python + Boto3
+# AWS WAFv2 Automation & Analysis — Python + Boto3
 
 A hands-on body of work demonstrating practical command of **AWS WAFv2** automation and traffic
 analysis with **Python + Boto3**, built toward a **Perimeter Security Engineer** role. Every
