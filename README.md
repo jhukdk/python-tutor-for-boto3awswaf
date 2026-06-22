@@ -1,11 +1,11 @@
 # AWS WAF Automation & Analysis — Python + Boto3
 
-A hands-on body of work demonstrating practical command of **AWS WAF** automation and traffic
-analysis with **Python 3 + Boto3**, built toward a **Perimeter Security Engineer** role. Every
-exercise was authored and executed directly against live AWS infrastructure — from read-only
-inventory and CloudWatch-backed analysis to controlled, lock-safe changes on a production Web
-ACL. Progression is **knowledge-gated**: each module advances only after the underlying concepts
-are demonstrated under examination, not merely read.
+A hands-on body of work demonstrating practical command of **AWS WAFv2** automation and traffic
+analysis with **Python + Boto3**, built toward a **Perimeter Security Engineer** role. Every
+exercise was planned then executed against live AWS infrastructure — from read-only inventory 
+and log-based analysis to controlled, lock-safe changes on a production Web ACL. Progression 
+is **knowledge-gated**: each module advances only after the underlying concepts
+are demonstrated under examination by Claude Code, not merely read.
 
 > **Stack:** AWS · Boto3 · Python 3 · CloudWatch — extending into Terraform & GitHub Actions.
 
