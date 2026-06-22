@@ -7,7 +7,7 @@ and log-based analysis to controlled, lock-safe changes on a production Web ACL.
 is **knowledge-gated**: each module advances only after the underlying concepts
 are demonstrated under examination by Claude Code, not merely read.
 
-> **Stack:** AWS · Boto3 · Python 3 · CloudWatch — extending into Terraform & GitHub Actions.
+> **Stack:** AWS · Boto3 · Python 3 · CloudWatch · Terraform · GitHub Actions (OIDC).
 
 ---
 
@@ -32,6 +32,25 @@ are demonstrated under examination by Claude Code, not merely read.
 - Reading and navigating API responses; manual `NextMarker` pagination where no paginator exists.
 - Robust error handling via `botocore.exceptions.ClientError`, branching on the error `Code`.
 
+### Infrastructure as Code (Terraform)
+- **WAF resources as code** — model an `aws_wafv2_ip_set` declaratively, replacing imperative
+  Boto3 calls; Terraform manages the optimistic-lock token automatically.
+- **The full lifecycle** — `init → plan → apply`, reading `plan` output as a reviewable change
+  preview (`+`/`~`/`-`), with the declarative model guaranteeing idempotent re-runs.
+- **State & drift** — understand state as the config↔reality mapping, and how `plan` detects and
+  reverts out-of-band changes — the audit/compliance case for IaC on a security team.
+
+### CI/CD & secure cloud authentication (GitHub Actions + OIDC)
+- **Pull-request gating** — a GitHub Actions pipeline that runs `terraform fmt` / `validate` /
+  `plan` on every PR touching infrastructure, so proposed WAF changes are previewed and blocked
+  *before* merge ("shift left").
+- **Keyless AWS access via OIDC** — Actions authenticates to AWS by exchanging a short-lived,
+  repo-scoped OIDC token for temporary STS credentials — **no long-lived access keys stored
+  anywhere.**
+- **Least-privilege, auditable bootstrap** — an IAM role whose trust policy only accepts tokens
+  from this repository, granted only the read-only WAF actions `terraform plan` requires; the IAM
+  trust and permission policies are captured as version-controlled files.
+
 ### Python engineering foundations
 Applied throughout in AWS-shaped contexts (response dicts, rule lists, nested structures):
 core types & f-strings, lists, `for`/`while` loops, conditionals & filtering, dictionaries
@@ -44,11 +63,14 @@ exception handling.
 
 ```
 .
-├── fundamentals/   # Python engineering foundations, one concept per file
-├── boto3_core/     # Boto3 client, calls, pagination, error handling
-├── waf/            # WAF inventory, traffic analysis, controlled changes
-├── CLAUDE.md       # engagement instructions & AWS safety guardrails
-└── PROGRESS.md     # detailed, dated work log
+├── fundamentals/         # Python engineering foundations, one concept per file
+├── boto3_core/           # Boto3 client, calls, pagination, error handling
+├── waf/                  # WAF inventory, traffic analysis, controlled changes
+├── terraform/            # WAF resources as Terraform (IaC)
+├── iam-bootstrap/        # documented IAM trust & permission policies for CI OIDC
+├── .github/workflows/    # GitHub Actions CI (fmt / validate / OIDC-auth plan)
+├── CLAUDE.md             # engagement instructions & AWS safety guardrails
+└── PROGRESS.md           # detailed, dated work log
 ```
 
 Each file is small, self-contained, and runnable on its own.
@@ -83,9 +105,9 @@ expected on a production security team:
 
 ## In progress
 
-- **Infrastructure as Code** — modeling WAF resources in Terraform (`plan`/`apply`, state & drift).
-- **CI/CD** — GitHub Actions validating and planning Terraform on pull requests, with OIDC auth
-  to AWS (no long-lived keys).
+- **Remote Terraform state** — an S3 backend (with locking) so CI and local runs share state,
+  making the pipeline's `plan` an accurate diff against real infrastructure.
+- **Gated apply** — a manually-approved, more-privileged `apply` job that runs after merge.
 - **Detection & response** — rule tuning from real sampled traffic, rate-based and bot controls,
   and false-positive triage.
 
