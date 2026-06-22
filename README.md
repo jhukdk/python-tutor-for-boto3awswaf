@@ -29,7 +29,6 @@ are demonstrated under examination by Claude Code, not merely read.
 ### Boto3 & AWS integration
 - Client/session construction, the AWS credential chain, and the region-vs-`Scope` model
   (REGIONAL → resource's region; CLOUDFRONT → `us-east-1`).
-- Reading and navigating API responses; manual `NextMarker` pagination where no paginator exists.
 - Robust error handling via `botocore.exceptions.ClientError`, branching on the error `Code`.
 
 ### Infrastructure as Code (Terraform)
@@ -82,7 +81,7 @@ Each file is small, self-contained, and runnable on its own.
 ```bash
 source .venv/bin/activate        # macOS / Linux  (.venv\Scripts\Activate.ps1 on Windows)
 
-python waf/w2_list_acls.py       # e.g. enumerate Web ACLs
+python3 waf/w2_list_acls.py       # e.g. enumerate Web ACLs
 ```
 
 Boto3 inherits credentials from the authenticated AWS CLI via the standard credential chain —
