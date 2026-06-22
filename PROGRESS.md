@@ -5,20 +5,19 @@
 
 ## Current status
 
-- **Phase:** 3 — IaC & CI/CD *(unlocked — Phase 2 complete)*
-- **Active module:** T1 — Terraform for WAF *(next)*
-- **Last verified:** W4 — Controlled changes ✅ (passed 2026-06-21)
+- **Phase:** 3 — IaC & CI/CD
+- **Active module:** G1 — GitHub Actions (OIDC to AWS, Terraform CI) *(next)*
+- **Last verified:** T1 — Terraform for WAF ✅ (passed 2026-06-21)
 
 ## ▶ Next action
 
-Begin **T1 — Terraform for WAF**: represent a Web ACL / rule / IP set as code; `plan` vs
-`apply`; state & drift; why IaC matters for auditable security changes. NEW TOOL (not Python) —
-learner likely needs Terraform installed (`terraform -version`). Start conceptual (declarative
-desired-state vs the imperative Boto3 calls they just made), then a tiny `aws_wafv2_ip_set`
-resource + `terraform plan` (read-only preview — no apply without confirm). Tie back to W4: the
-same IP set they created by hand, now as code. **Owner-authorized writes on `jhuk-tech-cloudfront`
-remain in force** (see CLAUDE.md Sanctioned write target, 2026-06-21); still state change +
-blast radius before any `apply`.
+Begin **G1 — GitHub Actions**: CI that runs `terraform fmt`/`validate`/`plan` on PRs; **OIDC**
+auth from Actions → AWS (no long-lived keys — federated short-lived creds); gating WAF changes
+behind review. Tie directly to the repo they already pushed (PR #1 flow) and the `terraform/`
+config from T1. NEW: GitHub Actions YAML, repo Secrets/Variables, an IAM OIDC identity provider +
+role. Start conceptual (why OIDC beats stored access keys for CI), then a minimal
+`.github/workflows/*.yml` running fmt/validate on PR. Plan/apply steps need the AWS OIDC role —
+may require Console/IAM setup; confirm + state blast radius before creating IAM resources.
 
 ---
 
@@ -49,7 +48,7 @@ blast radius before any `apply`.
 - [x] W4 — Controlled changes (owner-authorized writes)  *(2026-06-21)*
 
 ### Phase 3 — IaC & CI/CD
-- [ ] T1 — Terraform for WAF
+- [x] T1 — Terraform for WAF  *(2026-06-21)*
 - [ ] G1 — GitHub Actions (OIDC to AWS, Terraform CI)
 
 ### Phase 4 — Security engineering & interview readiness
@@ -205,6 +204,24 @@ blast radius before any `apply`.
   → previously-blocked exploit patterns now reach the origin). Both nailed on re-ask. Files:
   `waf/w4_create_ipset.py`, `waf/w4_update_ipset.py`, `waf/w4_lock_demo.py`, `waf/w4_delete_ipset.py`.
   **Phase 2 / AWS WAF complete.** Next: Phase 3 / T1 (Terraform for WAF).
+
+- **2026-06-21** — Passed **T1 (Terraform for WAF)** — first IaC module, new tool (Terraform
+  v1.15.6 already installed; AWS provider v6.51.0). Taught **declarative vs imperative**
+  (idempotence: 2nd apply = no-op), HCL **provider + resource** blocks (`aws_wafv2_ip_set`,
+  type vs local name), and the full **`init → plan → apply`** loop. Ran it live: created a real
+  CLOUDFRONT IP set **`tf-practice`** (`192.0.2.0/24`, us-east-1, attached to nothing → zero
+  traffic impact) — the Terraform-managed twin of W4's hand-built `w4-practice`. Key tie-back:
+  `lock_token` shows as `(known after apply)` and **Terraform manages the optimistic-lock token
+  automatically** (the W4 get→modify→update dance is now the tool's job). Covered **state**
+  (`terraform.tfstate` = TF's memory / config↔real-resource mapping) and **drift** (out-of-band
+  Console/Boto3 edits surface in next plan → apply reverts to declared state = the security/audit
+  win). Updated `.gitignore` (commit `.tf` + `.terraform.lock.hcl`; ignore `.tfstate`,
+  `.terraform/`, `*.tfvars` — state holds secrets). **Gate: 4/5 clean** — only miss: thought
+  `.terraform.lock.hcl` is "concurrency control"; corrected → it's the **provider-version
+  dependency lock** (reproducible inits). Strong declarative intuition throughout (predicted
+  idempotence and drift-revert unprompted). Files: `terraform/main.tf` (+ `.terraform.lock.hcl`).
+  Learner chose to **keep** the live `tf-practice` IP set (Terraform-managed). Next: G1 (GitHub
+  Actions — OIDC to AWS, Terraform CI).
 
 ## Stumbling blocks / things to revisit
 
