@@ -6,18 +6,27 @@
 ## Current status
 
 - **Phase:** 3 — IaC & CI/CD
-- **Active module:** G1 — GitHub Actions (OIDC to AWS, Terraform CI) *(next)*
+- **Active module:** G1 — GitHub Actions *(IN PROGRESS — all teaching done; gate NOT yet taken)*
 - **Last verified:** T1 — Terraform for WAF ✅ (passed 2026-06-21)
 
 ## ▶ Next action
 
-Begin **G1 — GitHub Actions**: CI that runs `terraform fmt`/`validate`/`plan` on PRs; **OIDC**
-auth from Actions → AWS (no long-lived keys — federated short-lived creds); gating WAF changes
-behind review. Tie directly to the repo they already pushed (PR #1 flow) and the `terraform/`
-config from T1. NEW: GitHub Actions YAML, repo Secrets/Variables, an IAM OIDC identity provider +
-role. Start conceptual (why OIDC beats stored access keys for CI), then a minimal
-`.github/workflows/*.yml` running fmt/validate on PR. Plan/apply steps need the AWS OIDC role —
-may require Console/IAM setup; confirm + state blast radius before creating IAM resources.
+**Resume G1 at the KNOWLEDGE GATE** (learner paused right before answering; all 5 concepts taught,
+pipeline built & proven working live). Ask these 5, grade honestly, then mark G1 passed + update
+checklist/log:
+1. Why `pull_request` (pre-merge gate) over checks on `push` to `main` (post-merge)?
+2. Why is OIDC safer than a stored access key? (two reasons: no long-lived secret at rest +
+   short expiry; cryptographically scoped to the repo via the `sub` claim)
+3. What does `permissions: id-token: write` do, and what breaks without it? (no OIDC token minted)
+4. What attack does the trust-policy `sub: repo:jhukdk/python-tutor-for-boto3awswaf:*` prevent?
+   (another repo's token assuming the role)
+5. Why did CI `plan` say `1 to add` for an existing resource, and the fix? (local state not shared
+   with CI → remote S3 backend).
+
+After the gate passes → **G1 done = Phase 3 complete.** Open item: **PR #3 is mergeable (CI green)**
+— offer to merge + branch cleanup. Then Phase 4 / S1 (detection & response). Also still-open
+enhancements (now in README "In progress"): remote Terraform state (S3 backend) and a gated
+post-merge `apply` job.
 
 ---
 
@@ -222,6 +231,32 @@ may require Console/IAM setup; confirm + state blast radius before creating IAM 
   idempotence and drift-revert unprompted). Files: `terraform/main.tf` (+ `.terraform.lock.hcl`).
   Learner chose to **keep** the live `tf-practice` IP set (Terraform-managed). Next: G1 (GitHub
   Actions — OIDC to AWS, Terraform CI).
+
+- **2026-06-22** — **G1 (GitHub Actions) — IN PROGRESS, all teaching complete, paused before the
+  knowledge gate.** Covered, one concept at a time: (1) **Actions model** — workflow/`on:` trigger/
+  jobs/steps; chose `pull_request` as a PRE-MERGE gate (learner first guessed `push`-to-main;
+  corrected via timeline — post-merge = too late; "shift left"). (2) **First workflow**
+  `.github/workflows/terraform.yml` — `validate` job (checkout → setup-terraform → `fmt -check` →
+  `init -backend=false` → `validate`), no AWS needed; explained `defaults.run.working-directory`
+  (applies to `run:` not `uses:` steps). Merged as **PR #2** (green). (3) **OIDC concept** — why
+  stored access keys are bad (long-lived secret at rest) vs OIDC (no secret at rest + ~1h expiry +
+  repo-scoped trust); learner got the scoping half, coached the "no standing secret" half.
+  (4) **AWS bootstrap built live (real IAM writes, owner-authorized):** OIDC identity provider for
+  `token.actions.githubusercontent.com` ALREADY EXISTED (account `877995959706`) → reused its ARN;
+  created IAM role **`github-actions-terraform-plan`** (role id `AROA4Y3FDEWNPQEIUEMPR`) with a
+  trust policy scoped to `repo:jhukdk/python-tutor-for-boto3awswaf:*` + a least-privilege inline
+  policy (`wafv2:GetIPSet`/`ListIPSets`/`ListTagsForResource`). Captured both policies as
+  version-controlled files in `iam-bootstrap/`. (5) **Wired OIDC + plan** — added a `plan` job
+  (`needs: validate`, `permissions: id-token: write`, `aws-actions/configure-aws-credentials@v4`
+  with `role-to-assume: ${{ vars.AWS_ROLE_ARN }}`, `terraform plan`); set repo variable
+  `AWS_ROLE_ARN` via `gh`. **PR #3** opened — first push DIDN'T trigger (path filter was
+  `terraform/**` only; PR touched `.github/` + `iam-bootstrap/`) → real teaching moment; fixed by
+  adding `.github/workflows/terraform.yml` to the `paths` filter. **Re-ran GREEN:** `validate ✓`
+  + `plan ✓`; log shows `Authenticated as assumedRoleId AROA...:GitHubActions` (OIDC exchange
+  worked, zero stored keys) and `Plan: 1 to add` (CI has empty local state → motivates remote
+  state). Also updated README (IaC + CI/CD promoted to demonstrated capabilities) on the same PR.
+  (Minor warning seen: Node20 deprecation on the pinned actions — future cleanup.) **PR #3 is
+  mergeable; gate still owed.** Resume at the 5 gate questions in Next action.
 
 ## Stumbling blocks / things to revisit
 
