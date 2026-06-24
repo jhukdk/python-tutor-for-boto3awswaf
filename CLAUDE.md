@@ -25,12 +25,14 @@ current position, then follow the Session Protocol below.
   - **Knowledge-gated progression** — see "Knowledge Gates" below. This is the core method.
   - Prefers warm, direct feedback: name the bug, show the exact fix, explain the error type.
 
-### Verified Python knowledge (kept current in PROGRESS.md)
-- **M1 — Variables, types, printing, f-strings:** PASSED.
-  Demonstrated: `str`/`int`/`bool`, f-string substitution, `5` vs `"5"`, recognizing
-  `SyntaxError` (unterminated string) and `IndexError` concepts at an intro level.
-- **Currently on:** M2 — Lists (in progress; gate not yet met).
-- Everything from M2 onward is pending. **Do not assume knowledge beyond M1.**
+### Where we are
+- **`PROGRESS.md` is the single source of truth for current position.** Read it at the start of
+  every session and trust it over any module name mentioned in this file — this section is a
+  rough snapshot for orientation, not authority, and may lag.
+- **Rough snapshot (verify against PROGRESS.md):** Phases 0–2 complete (Python fundamentals,
+  Boto3 core, AWS WAF) plus T1 (Terraform). Currently on **Phase 3 / G1 — GitHub Actions**
+  (teaching done; paused at the knowledge gate).
+- **Do not assume knowledge beyond the last gate marked passed in PROGRESS.md.**
 
 ---
 
@@ -68,7 +70,7 @@ without hints. Keep checks short; favor showing over telling.
 - **M1 — Variables, types, printing** ✅ PASSED
   - Identify `str` / `int` / `bool` for given values; predict f-string output; explain `5` vs `"5"`.
 
-- **M2 — Lists** *(active)*
+- **M2 — Lists** ✅ PASSED
   - Zero-based indexing; `len()`; `[-1]` for last item; `.append()`; predict an `IndexError`
     from an out-of-range index and explain why.
 
@@ -137,7 +139,8 @@ is the prerequisite to touching Boto3.
 
 ## Roadmap & realistic expectations
 
-The order above **is** the roadmap. Current position: **Phase 0, M2.**
+The order above **is** the roadmap. Current position: **Phase 3, G1** (see PROGRESS.md for the
+authoritative, up-to-date status).
 
 Honest framing the learner asked for: going from true beginner to interview-ready for a security
 engineer role is a **multi-month effort** — realistically on the order of several months of
