@@ -5,27 +5,19 @@
 
 ## Current status
 
-- **Phase:** 3 — IaC & CI/CD
-- **Active module:** G1 — GitHub Actions *(IN PROGRESS — all teaching done; gate NOT yet taken)*
-- **Last verified:** T1 — Terraform for WAF ✅ (passed 2026-06-21)
+- **Phase:** 4 — Security engineering & interview readiness *(Phase 3 complete)*
+- **Active module:** S1 — Detection & response *(not started)*
+- **Last verified:** G1 — GitHub Actions ✅ (passed 2026-06-24)
 
 ## ▶ Next action
 
-**Resume G1 at the KNOWLEDGE GATE** (learner paused right before answering; all 5 concepts taught,
-pipeline built & proven working live). Ask these 5, grade honestly, then mark G1 passed + update
-checklist/log:
-1. Why `pull_request` (pre-merge gate) over checks on `push` to `main` (post-merge)?
-2. Why is OIDC safer than a stored access key? (two reasons: no long-lived secret at rest +
-   short expiry; cryptographically scoped to the repo via the `sub` claim)
-3. What does `permissions: id-token: write` do, and what breaks without it? (no OIDC token minted)
-4. What attack does the trust-policy `sub: repo:jhukdk/python-tutor-for-boto3awswaf:*` prevent?
-   (another repo's token assuming the role)
-5. Why did CI `plan` say `1 to add` for an existing resource, and the fix? (local state not shared
-   with CI → remote S3 backend).
+**Begin S1 — Detection & response / rule tuning.** Tie back to W3 (sampled requests, CloudWatch
+metrics) and W4 (controlled changes): tuning rules from real sampled traffic, rate-based & bot
+controls, false-positive triage, and an incident walkthrough (e.g. responding to a traffic spike).
+Teach one concept at a time per usual; keep it WAF-flavored against `jhuk-tech-cloudfront`.
 
-After the gate passes → **G1 done = Phase 3 complete.** Open item: **PR #3 is mergeable (CI green)**
-— offer to merge + branch cleanup. Then Phase 4 / S1 (detection & response). Also still-open
-enhancements (now in README "In progress"): remote Terraform state (S3 backend) and a gated
+Still-open Phase 3 enhancements (optional, in README "In progress") — revisit if useful:
+remote Terraform state (S3 backend, the real fix for CI's `1 to add` amnesia) and a gated
 post-merge `apply` job.
 
 ---
@@ -58,7 +50,7 @@ post-merge `apply` job.
 
 ### Phase 3 — IaC & CI/CD
 - [x] T1 — Terraform for WAF  *(2026-06-21)*
-- [ ] G1 — GitHub Actions (OIDC to AWS, Terraform CI)
+- [x] G1 — GitHub Actions (OIDC to AWS, Terraform CI)  *(2026-06-24)*
 
 ### Phase 4 — Security engineering & interview readiness
 - [ ] S1 — Detection & response / rule tuning
@@ -257,6 +249,23 @@ post-merge `apply` job.
   state). Also updated README (IaC + CI/CD promoted to demonstrated capabilities) on the same PR.
   (Minor warning seen: Node20 deprecation on the pinned actions — future cleanup.) **PR #3 is
   mergeable; gate still owed.** Resume at the 5 gate questions in Next action.
+
+- **2026-06-24** — Passed **G1 (GitHub Actions)** — **Phase 3 complete.** Learner returned saying
+  "I don't understand what's going on" → did a full ground-up RE-TEACH of the phase instead of the
+  gate, walking the real artifacts (`.github/workflows/terraform.yml`, `iam-bootstrap/*.json`)
+  layer by layer: (1) the *why* — GitHub Actions as a neutral automated checkpoint vs trusting one
+  dev's laptop (learner restated it cleanly; sharpened that it's currently a review *aid* that
+  shows `plan`, not yet a hard *gate* — that's the open post-merge `apply` enhancement);
+  (2) workflow vocabulary (`on`/`jobs`/`runs-on`/`steps`) + the **blank-stranger VM** idea +
+  re-surfaced the live `paths:` filter bug (first PR #3 push didn't trigger); (3) **OIDC** — the
+  blank VM has no creds → GitHub mints a short-lived JWT scoped via `sub` → AWS trust policy checks
+  it → ~1h temp creds; coached the **two-token distinction** (JWT for the handshake vs the AWS creds
+  that do the work); (4) the **two IAM policies** — trust ("who gets in", `sub` check) vs permissions
+  ("what they can do", least-privilege read-only wafv2); (5) `validate`→`plan` (`needs:`) and the
+  **`1 to add` amnesia** = no state file on the runner → motivates remote S3 state. Learner answered
+  all five gate concepts correctly through the walkthrough (only sharpenings needed: enforcement
+  lives in the trust policy, not the JWT). PR #3 already merged earlier. Next: Phase 4 / S1
+  (detection & response, rule tuning).
 
 ## Stumbling blocks / things to revisit
 
