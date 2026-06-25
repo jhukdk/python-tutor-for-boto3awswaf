@@ -29,9 +29,9 @@ current position, then follow the Session Protocol below.
 - **`PROGRESS.md` is the single source of truth for current position.** Read it at the start of
   every session and trust it over any module name mentioned in this file — this section is a
   rough snapshot for orientation, not authority, and may lag.
-- **Rough snapshot (verify against PROGRESS.md):** Phases 0–2 complete (Python fundamentals,
-  Boto3 core, AWS WAF) plus T1 (Terraform). Currently on **Phase 3 / G1 — GitHub Actions**
-  (teaching done; paused at the knowledge gate).
+- **Rough snapshot (verify against PROGRESS.md):** Phases 0–3 complete (Python fundamentals,
+  Boto3 core, AWS WAF, IaC & CI/CD). Currently on **Phase 4 / S1 — Detection & response**
+  (not started).
 - **Do not assume knowledge beyond the last gate marked passed in PROGRESS.md.**
 
 ---
@@ -139,7 +139,7 @@ is the prerequisite to touching Boto3.
 
 ## Roadmap & realistic expectations
 
-The order above **is** the roadmap. Current position: **Phase 3, G1** (see PROGRESS.md for the
+The order above **is** the roadmap. Current position: **Phase 4, S1** (see PROGRESS.md for the
 authoritative, up-to-date status).
 
 Honest framing the learner asked for: going from true beginner to interview-ready for a security
